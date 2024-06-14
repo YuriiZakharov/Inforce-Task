@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "About";
+}
+
+<h1>About Page</h1>
+
+@if (ViewBag.IsAdmin)
+{
+    <form asp-action="About" method="post">
+        <div class="form-group">
+            <label for="aboutContent">About Content:</label>
+            <textarea class="form-control" id="aboutContent" name="aboutContent" rows="10">@ViewBag.AboutContent</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+}
+else
+{
+    <div>
+        <p>@Html.Raw(ViewBag.AboutContent.Replace("\n", "<br>"))</p>
+    </div>
+}

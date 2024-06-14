@@ -1,0 +1,86 @@
+﻿@model List<WebApplication1.Models.URL>
+
+@{
+    ViewData["Title"] = "URL Shortener";
+}
+
+<h1>URL Shortener</h1>
+
+@if (ViewBag.IsLoggedIn)
+{
+    <p>Welcome! You are logged in.</p>
+}
+else
+{
+    <p>Welcome! Please log in to manage your URLs.</p>
+}
+@if (ViewBag.IsLoggedIn)
+{
+    <div>
+        <form asp-action="AddUrl" method="post">
+            <label for="longUrl">Long URL:</label>
+            <input type="text" id="longUrl" name="longUrl" required>
+            <button type="submit">Shorten URL</button>
+        </form>
+    </div>
+}
+
+@if (Model.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Long URL</th>
+                <th>Short URL</th>
+                <th>Details</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var url in Model)
+            {
+                <tr>
+                    <td>@url.LongUrl</td>
+                    <td><a href="#" onclick="redirectToLongUrl('@url.ShortUrl')">https://localhost:7261/api/redirect/@url.ShortUrl</a></td>
+                    @if (ViewBag.IsLoggedIn)
+                    {
+                        <td>
+                            <a asp-action="Details" asp-route-id="@url.Id">Details</a>
+                        </td>
+                        @if (url.CreatedBy == ViewBag.UserId || ViewBag.IsAdmin)
+                        {
+                            <td>
+                            <form asp-action="DeleteUrl" method="post">
+                            <input type="hidden" name="id" value="@url.Id" />
+                            <button type="submit">Delete</button>
+                            </form>
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No URLs added yet.</p>
+}
+
+<script>
+    function redirectToLongUrl(shortUrl) {
+        // Make an AJAX request to the server to handle the redirection
+        $.ajax({
+            url: '/Home/RedirectToLongUrl',
+            type: 'POST',
+            data: { shortUrl: shortUrl },
+            success: function(response) {
+                // Redirect to the long URL received from the server
+                window.location.href = response.longUrl;
+            },
+            error: function() {
+                alert('Failed to redirect to the long URL.');
+            }
+        });
+    }
+</script>

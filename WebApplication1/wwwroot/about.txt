@@ -1,0 +1,29 @@
+1. Adding a New URL (AddUrl Action)
+When a user submits a long URL through a form or API, the application first checks if this URL already exists in the database (_context.URLs.FirstOrDefault(u => u.LongUrl == longUrl)). If it exists, a BadRequest response is returned with a message indicating that the URL already exists.
+
+If the URL doesn't exist, the application proceeds to generate a short URL using the GenerateShortUrl() method. This method generates a random string of 6 characters (length can be adjusted based on requirements) composed of alphanumeric characters (both uppercase and lowercase letters, and digits).
+
+After generating a unique short URL, a new URL object is created with the following properties:
+
+LongUrl: The original long URL submitted by the user.
+ShortUrl: The generated short URL.
+CreateDate: The timestamp when the URL was added to the database (DateTime.Now).
+CreatedBy: The ID of the user who created the URL, retrieved from the session (HttpContext.Session.GetInt32("UserId")).
+The newly created URL object is then added to the database (_context.URLs.Add(newUrl)) and saved (_context.SaveChanges()).
+
+2. Redirecting to Long URL (RedirectToLongUrl Action)
+When a user clicks on a short URL, the application intercepts the request through the RedirectToLongUrl action. The shortUrl parameter contains the short URL that was clicked.
+
+The action queries the database to find a matching URL object based on the ShortUrl property (_context.URLs.FirstOrDefault(u => u.ShortUrl == shortUrl)).
+
+If a matching URL is found (url != null), the action logs the redirection for debugging purposes and returns a JSON response (Json(new { longUrl = url.LongUrl })) containing the original long URL. This JSON response is then used to redirect the user to the original long URL.
+
+If the shortUrl does not match any records in the database, a NotFound response (HTTP 404) is returned, indicating that the short URL does not exist.
+
+3. Generating Short URLs (GenerateShortUrl Method)
+The GenerateShortUrl() method generates a random alphanumeric string of fixed length (6 characters in this case). It uses a loop to randomly select characters from a predefined set of characters ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789").
+
+After generating a candidate short URL, it checks if this URL already exists in the database (_context.URLs.Any(u => u.ShortUrl == shortUrl)). If it does, it generates a new random string and repeats the check until a unique short URL is found.
+
+Summary
+This URL shortening algorithm ensures that each long URL submitted by users is uniquely associated with a short URL generated randomly. The application checks for duplicate long URLs before generating a new short URL and handles redirection from short URLs to the original long URLs efficiently using database queries and JSON responses. Adjustments can be made to the length of the short URL or the character set based on specific requirements or constraints.
